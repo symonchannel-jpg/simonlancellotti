@@ -158,6 +158,33 @@ a { color: inherit; text-decoration: none; }
   z-index: 1;
 }
 
+.hero-loader {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  z-index: 3;
+  overflow: hidden;
+  transition: opacity 0.5s ease;
+}
+
+.hero-loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-loader-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
 .hero-content {
   position: relative;
   z-index: 2;
@@ -930,6 +957,9 @@ a { color: inherit; text-decoration: none; }
     <source src="banner.mp4" type="video/mp4">
   </video>
   <div class="hero-overlay"></div>
+  <div class="hero-loader" id="hero-loader">
+    <div class="hero-loader-bar" id="hero-loader-bar"></div>
+  </div>
   <div class="hero-content">
     <h1 id="hero-name" data-text="Simon Lancellotti"></h1>
     <p class="hero-title">AI Creative · Audiovisual · UI/UX</p>
@@ -1380,12 +1410,31 @@ a { color: inherit; text-decoration: none; }
   }
 
   var heroVideo = document.querySelector('.hero-video');
+  var loader = document.getElementById('hero-loader');
+  var loaderBar = document.getElementById('hero-loader-bar');
+
   if (heroVideo) {
-    heroVideo.addEventListener('canplay', function() {
-      heroVideo.classList.add('loaded');
+    heroVideo.addEventListener('progress', function() {
+      if (heroVideo.buffered.length > 0) {
+        var bufferedEnd = heroVideo.buffered.end(heroVideo.buffered.length - 1);
+        var duration = heroVideo.duration;
+        if (duration > 0) {
+          var pct = Math.min((bufferedEnd / duration) * 100, 100);
+          loaderBar.style.width = pct + '%';
+        }
+      }
     });
-    if (heroVideo.readyState >= 3) {
-      heroVideo.classList.add('loaded');
+
+    function videoReady() {
+      loader.classList.add('hidden');
+      setTimeout(function() {
+        heroVideo.classList.add('loaded');
+      }, 400);
+    }
+
+    heroVideo.addEventListener('canplaythrough', videoReady);
+    if (heroVideo.readyState >= 4) {
+      videoReady();
     }
   }
 })();
