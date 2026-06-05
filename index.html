@@ -167,6 +167,23 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.02em;
   line-height: 1.1;
   margin-bottom: 16px;
+  min-height: 1.1em;
+}
+
+.hero-content h1::after {
+  content: '|';
+  font-weight: 300;
+  color: var(--accent);
+  margin-left: 2px;
+  animation: blink 0.7s step-end infinite;
+}
+
+.hero-content h1.done::after {
+  display: none;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
 }
 
 .hero-title {
@@ -908,7 +925,7 @@ a { color: inherit; text-decoration: none; }
   </video>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1>Simon Lancellotti</h1>
+    <h1 id="hero-name" data-text="Simon Lancellotti"></h1>
     <p class="hero-title">AI Creative · Audiovisual · UI/UX</p>
     <p class="hero-tagline">I make things, visuals, experiences</p>
     <a href="#work" class="hero-cta" id="hero-cta">Explore Work <span style="font-size:0.85em;">↓</span></a>
@@ -1340,6 +1357,21 @@ a { color: inherit; text-decoration: none; }
   document.querySelectorAll('.reveal').forEach(function(el) {
     observer.observe(el);
   });
+
+  var heroName = document.getElementById('hero-name');
+  if (heroName) {
+    var text = heroName.getAttribute('data-text');
+    var i = 0;
+    setTimeout(function typeChar() {
+      if (i < text.length) {
+        heroName.textContent += text.charAt(i);
+        i++;
+        setTimeout(typeChar, 70);
+      } else {
+        heroName.classList.add('done');
+      }
+    }, 500);
+  }
 })();
 </script>
 
