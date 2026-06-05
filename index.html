@@ -3,6 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Simon Lancellotti — AI Creative & Audiovisual portfolio. Cinematography, UI/UX design, and full-stack development fused with generative AI.">
+<meta property="og:title" content="Simon Lancellotti — Portfolio">
+<meta property="og:description" content="AI Creative · Audiovisual · UI/UX. Cinematic storytelling meets AI-powered development.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="perfil.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Simon Lancellotti — Portfolio">
+<meta name="twitter:description" content="AI Creative · Audiovisual · UI/UX. Cinematic storytelling meets AI-powered development.">
+<meta name="twitter:image" content="perfil.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9956b'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='18' font-weight='bold' fill='%230a0a0f'>SL</text></svg>">
 <title>Simon Lancellotti — Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
@@ -328,6 +338,13 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(-4px);
   border-color: rgba(201,149,107,0.35);
   box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,149,107,0.1);
+}
+
+.video-card:focus-visible {
+  outline: none;
+  border-color: rgba(201,149,107,0.45);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 2px var(--accent);
+  transform: translateY(-4px);
 }
 
 .video-thumb {
@@ -759,6 +776,11 @@ a { color: inherit; text-decoration: none; }
 
 .email-btn:hover { color: var(--accent-light); }
 
+.email-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
 .email-popup {
   position: absolute;
   bottom: 100%;
@@ -872,7 +894,7 @@ a { color: inherit; text-decoration: none; }
 </nav>
 
 <section class="hero" id="hero">
-  <video class="hero-video" autoplay muted loop playsinline preload="auto">
+  <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="thumbs/banner.jpg">
     <source src="banner.mp4" type="video/mp4">
   </video>
   <div class="hero-overlay"></div>
@@ -1077,16 +1099,18 @@ a { color: inherit; text-decoration: none; }
     <div class="gold-divider"></div>
     <a href="#hero" class="footer-logo">Simon Lancellotti</a>
     <div class="footer-links">
-      <button class="email-btn" id="email-btn">Email</button>
+      <span class="email-wrap">
+        <button class="email-btn" id="email-btn">Email</button>
+        <div class="email-popup" id="email-popup">
+          <span class="email-addr">simonvcp1@gmail.com</span>
+          <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+      </span>
       <a href="https://github.com/symonchannel-jpg" target="_blank">GitHub</a>
       <a href="https://www.youtube.com/@mortalazofilms8467" target="_blank">YouTube</a>
       <a href="https://youtu.be/BDlqd3hTHDg" target="_blank">Showreel</a>
     </div>
     <p class="footer-copy">Córdoba, Argentina · 28 · © 2026 Simon Lancellotti</p>
-    <div class="email-popup" id="email-popup">
-      <span class="email-addr">simonvcp1@gmail.com</span>
-      <button class="copy-btn" id="copy-btn">Copy</button>
-    </div>
   </div>
 </footer>
 
@@ -1125,32 +1149,49 @@ a { color: inherit; text-decoration: none; }
     { file: '48H Film Project Festival_ANIMATED BACKGROUND & TITLES_2022.mp4', title: '48H Film Project', year: '2022' }
   ];
 
-  var workGrid = document.getElementById('work-grid');
+  const workGrid = document.getElementById('work-grid');
   videos.forEach(function(v) {
-    var thumbPath = 'thumbs/' + v.file.replace(/\.mp4$/i, '.jpg');
-    var card = document.createElement('div');
+    const thumbPath = 'thumbs/' + v.file.replace(/\.mp4$/i, '.jpg');
+    const vidEncoded = encodeURI(v.file);
+    const card = document.createElement('div');
     card.className = 'video-card reveal';
-    var vidEncoded = encodeURI(v.file);
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', 'Play ' + v.title);
     card.innerHTML =
       '<div class="video-thumb" style="background-image:url(' + encodeURI(thumbPath) + ')">' +
-        '<video class="hover-preview" muted playsinline preload="none" data-src="' + vidEncoded + '"></video>' +
         '<div class="play-circle"></div>' +
       '</div>' +
       '<div class="video-info">' +
         '<h3>' + v.title + '</h3>' +
         '<span class="year">' + v.year + '</span>' +
       '</div>';
+
+    let hoverPreview = null;
+
     card.addEventListener('click', function() { openModal(v); });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openModal(v);
+      }
+    });
 
     card.addEventListener('mouseenter', function() {
-      var vid = this.querySelector('.hover-preview');
-      if (!vid.src) vid.src = vid.dataset.src;
-      vid.currentTime = 0;
-      vid.play().catch(function() {});
+      if (!hoverPreview) {
+        hoverPreview = document.createElement('video');
+        hoverPreview.className = 'hover-preview';
+        hoverPreview.muted = true;
+        hoverPreview.playsInline = true;
+        hoverPreview.preload = 'none';
+        hoverPreview.src = vidEncoded;
+        this.querySelector('.video-thumb').appendChild(hoverPreview);
+      }
+      hoverPreview.currentTime = 0;
+      hoverPreview.play().catch(function() {});
     });
     card.addEventListener('mouseleave', function() {
-      var vid = this.querySelector('.hover-preview');
-      vid.pause();
+      if (hoverPreview) hoverPreview.pause();
     });
 
     workGrid.appendChild(card);
@@ -1158,7 +1199,7 @@ a { color: inherit; text-decoration: none; }
 
   function openModal(video) {
     modalVideo.querySelector('source') && modalVideo.querySelector('source').remove();
-    var source = document.createElement('source');
+    const source = document.createElement('source');
     source.src = encodeURI(video.file);
     source.type = 'video/mp4';
     modalVideo.appendChild(source);
@@ -1180,23 +1221,25 @@ a { color: inherit; text-decoration: none; }
   modalBackdrop.addEventListener('click', closeModalFn);
 
   navToggle.addEventListener('click', function() {
-    nav.classList.toggle('mobile-open');
+    const isOpen = nav.classList.toggle('mobile-open');
+    navToggle.setAttribute('aria-expanded', isOpen);
   });
 
   navLinks.forEach(function(link) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
       nav.classList.remove('mobile-open');
-      var id = this.getAttribute('href').replace('#', '');
-      var target = document.getElementById(id);
+      navToggle.setAttribute('aria-expanded', 'false');
+      const id = this.getAttribute('href').replace('#', '');
+      const target = document.getElementById(id);
       if (target) smoothScrollTo(target);
     });
   });
 
   function smoothScrollTo(target, duration) {
-    var start = window.pageYOffset;
-    var end = target.getBoundingClientRect().top + start;
-    var startTime = null;
+    const start = window.pageYOffset;
+    const end = target.getBoundingClientRect().top + start;
+    let startTime = null;
     duration = duration || 1200;
 
     function easeInOutCubic(t) {
@@ -1205,9 +1248,9 @@ a { color: inherit; text-decoration: none; }
 
     function animate(currentTime) {
       if (!startTime) startTime = currentTime;
-      var elapsed = currentTime - startTime;
-      var progress = Math.min(elapsed / duration, 1);
-      var eased = easeInOutCubic(progress);
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeInOutCubic(progress);
       window.scrollTo(0, start + (end - start) * eased);
       if (progress < 1) requestAnimationFrame(animate);
     }
@@ -1215,21 +1258,22 @@ a { color: inherit; text-decoration: none; }
     requestAnimationFrame(animate);
   }
 
-  var heroCta = document.getElementById('hero-cta');
+  const heroCta = document.getElementById('hero-cta');
   if (heroCta) {
     heroCta.addEventListener('click', function(e) {
       e.preventDefault();
-      var target = document.getElementById('work');
+      const target = document.getElementById('work');
       if (target) smoothScrollTo(target);
     });
   }
 
-  var navLogo = document.querySelector('.nav-logo');
+  const navLogo = document.querySelector('.nav-logo');
   if (navLogo) {
     navLogo.addEventListener('click', function(e) {
       e.preventDefault();
       nav.classList.remove('mobile-open');
-      var target = document.getElementById('hero');
+      navToggle.setAttribute('aria-expanded', 'false');
+      const target = document.getElementById('hero');
       if (target) smoothScrollTo(target, 800);
     });
   }
@@ -1241,9 +1285,9 @@ a { color: inherit; text-decoration: none; }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  var emailBtn = document.getElementById('email-btn');
-  var emailPopup = document.getElementById('email-popup');
-  var copyBtn = document.getElementById('copy-btn');
+  const emailBtn = document.getElementById('email-btn');
+  const emailPopup = document.getElementById('email-popup');
+  const copyBtn = document.getElementById('copy-btn');
 
   emailBtn.addEventListener('click', function(e) {
     e.stopPropagation();
@@ -1275,7 +1319,7 @@ a { color: inherit; text-decoration: none; }
     if (e.key === 'Escape' && emailPopup.classList.contains('show')) emailPopup.classList.remove('show');
   });
 
-  var observer = new IntersectionObserver(function(entries) {
+  const observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
