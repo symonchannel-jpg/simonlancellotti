@@ -139,6 +139,12 @@ a { color: inherit; text-decoration: none; }
   width: 100%; height: 100%;
   object-fit: cover;
   z-index: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.hero-video.loaded {
+  opacity: 1;
 }
 
 .hero-overlay {
@@ -920,7 +926,7 @@ a { color: inherit; text-decoration: none; }
 </nav>
 
 <section class="hero" id="hero">
-  <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="thumbs/banner.jpg">
+  <video class="hero-video" autoplay muted loop playsinline preload="auto">
     <source src="banner.mp4" type="video/mp4">
   </video>
   <div class="hero-overlay"></div>
@@ -1371,6 +1377,16 @@ a { color: inherit; text-decoration: none; }
         heroName.classList.add('done');
       }
     }, 500);
+  }
+
+  var heroVideo = document.querySelector('.hero-video');
+  if (heroVideo) {
+    heroVideo.addEventListener('canplay', function() {
+      heroVideo.classList.add('loaded');
+    });
+    if (heroVideo.readyState >= 3) {
+      heroVideo.classList.add('loaded');
+    }
   }
 })();
 </script>
